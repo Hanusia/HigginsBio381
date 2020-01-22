@@ -1,0 +1,12 @@
+---
+title: "Homework_01"
+author: "Hanusia Higgins"
+date: "1/22/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+## Homework 1
+[Typora document](Higgins_Homework1.html)
