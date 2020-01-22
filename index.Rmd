@@ -12,10 +12,9 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+
+<img src="itme.jpg" width="200" height="200" />
+
+
+
 ### [Homework 1](https://hanusia.github.io/HigginsBio381/Homework_01)
-
-
-
-![](http://hanusia.github.io/HigginsBio381/itme.jpg)
-
-
