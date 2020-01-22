@@ -9,4 +9,4 @@ output: html_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 ## Homework 1
-[Typora document](Higgins_Homework1.html)
+[Typora document](Higgins_Homework01.html)
