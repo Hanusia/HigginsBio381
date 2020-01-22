@@ -12,4 +12,10 @@ output:
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-[Homework 1](https://hanusia.github.io/HigginsBio381/Homework_01)
+### [Homework 1](https://hanusia.github.io/HigginsBio381/Homework_01)
+
+
+
+![](http://hanusia.github.io/HigginsBio381/itme.jpg)
+
+
