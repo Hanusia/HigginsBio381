@@ -417,11 +417,11 @@ print(c)</code></pre>
 </ol>
 <pre class="r"><code>z &lt;- runif(2) #creating a vector of two random uniform numbers, representing x and y
 print(paste(&quot;Cartesian coordinates: (&quot;,z[1], &quot;, &quot;, z[2], &quot;)&quot;), quote=FALSE)</code></pre>
-<pre><code>## [1] Cartesian coordinates: ( 0.06372947874479 ,  0.101416778052226 )</code></pre>
+<pre><code>## [1] Cartesian coordinates: ( 0.346128147561103 ,  0.0585468700155616 )</code></pre>
 <pre class="r"><code>r &lt;- sqrt(z[1]^2+z[2]^2) #converting to the value of r, the hypotenuse of the triangle formed by x and y
 theta &lt;- atan(z[2]/z[1]) #converting to the value of theta, the inverse tangent of y/x
 print(paste(&quot;polar coordinates: (&quot;,r, &quot;, &quot;, theta, &quot;)&quot;), quote=FALSE)</code></pre>
-<pre><code>## [1] polar coordinates: ( 0.11977816717406 ,  1.00976163178466 )</code></pre>
+<pre><code>## [1] polar coordinates: ( 0.351044769969159 ,  0.167561932932356 )</code></pre>
 <ol start="4" style="list-style-type: decimal">
 <li>Suppose that <code>queue &lt;- c(&quot;sheep&quot;, &quot;fox&quot;, &quot;owl&quot;, &quot;ant&quot;)</code> and that queue represents the animals that are lined up to enter Noah’s Ark, with the sheep at the front of the line. Using R expressions, update the queue successively as<br />
 </li>
