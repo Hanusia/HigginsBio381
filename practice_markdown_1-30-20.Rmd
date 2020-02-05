@@ -1,0 +1,66 @@
+---
+title: "markdown class practice 1-30-20"
+author: "Hanusia Higgins"
+date: "1/30/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Eq 1: $a+b$
+
+Eq 2: $$c+d$$
+
+$$\alpha + \beta$$
+
+$$S_{a+b_{\alpha+\beta}}$$
+
+$$T^{x+y}$$
+
+$$P(\mbox{occurrence of species A}) = Z_a$$
+
+First line  
+Second line  
+third line  
+
+```
+plain text (no extra formatting)
+$$not an equation a+b$$
+```
+
+Use a single backtick for plain text `in a sentence.`
+
+The value of $\pi$ is `r pi`.
+
+```{r echo=TRUE, eval=FALSE}
+# use comments!
+runif(10)
+```
+
+```{bash}
+pwd
+```
+
+
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+## Including Plots
+
+You can also embed plots, for example:
+
+```{r pressure, echo=FALSE}
+plot(pressure)
+```
+
+Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
