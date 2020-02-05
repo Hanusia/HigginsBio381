@@ -417,11 +417,11 @@ print(c)</code></pre>
 </ol>
 <pre class="r"><code>z &lt;- runif(2) #creating a vector of two random uniform numbers, representing x and y
 print(paste(&quot;Cartesian coordinates: (&quot;,z[1], &quot;, &quot;, z[2], &quot;)&quot;), quote=FALSE)</code></pre>
-<pre><code>## [1] Cartesian coordinates: ( 0.585421524243429 ,  0.658143852604553 )</code></pre>
+<pre><code>## [1] Cartesian coordinates: ( 0.06372947874479 ,  0.101416778052226 )</code></pre>
 <pre class="r"><code>r &lt;- sqrt(z[1]^2+z[2]^2) #converting to the value of r, the hypotenuse of the triangle formed by x and y
 theta &lt;- atan(z[2]/z[1]) #converting to the value of theta, the inverse tangent of y/x
 print(paste(&quot;polar coordinates: (&quot;,r, &quot;, &quot;, theta, &quot;)&quot;), quote=FALSE)</code></pre>
-<pre><code>## [1] polar coordinates: ( 0.880835791602875 ,  0.84381053257996 )</code></pre>
+<pre><code>## [1] polar coordinates: ( 0.11977816717406 ,  1.00976163178466 )</code></pre>
 <ol start="4" style="list-style-type: decimal">
 <li>Suppose that <code>queue &lt;- c(&quot;sheep&quot;, &quot;fox&quot;, &quot;owl&quot;, &quot;ant&quot;)</code> and that queue represents the animals that are lined up to enter Noah’s Ark, with the sheep at the front of the line. Using R expressions, update the queue successively as<br />
 </li>
@@ -442,14 +442,28 @@ print(paste(&quot;polar coordinates: (&quot;,r, &quot;, &quot;, theta, &quot;)&q
 <li>Finally, determine the position of the aphid in the line.</li>
 </ol>
 <pre class="r"><code>queue &lt;- c(&quot;sheep&quot;, &quot;fox&quot;, &quot;owl&quot;, &quot;ant&quot;) #setting up the initial queue
-queue &lt;- c(queue,&quot;snake&quot;) #the serpent arrives
-queue &lt;- queue[2:length(queue)] #the sheep enters the ark
-queue &lt;- c(&quot;donkey&quot;,queue) #the donkey arrives and talks his way to the front of the line
-queue &lt;- queue[1:length(queue)-1] #the serpent gets impatient and leaves
-queue &lt;- queue[c(1,2,4)] #the owl gets bored and leaves
-queue &lt;- c(queue[1:2],&quot;aphid&quot;,queue[3]) #the aphid arrives and the ant invites him to cut in line.
-print(queue[3]) #the aphid is third in line</code></pre>
-<pre><code>## [1] &quot;aphid&quot;</code></pre>
+print(queue)</code></pre>
+<pre><code>## [1] &quot;sheep&quot; &quot;fox&quot;   &quot;owl&quot;   &quot;ant&quot;</code></pre>
+<pre class="r"><code>queue &lt;- c(queue,&quot;snake&quot;) #the serpent arrives
+print(queue)</code></pre>
+<pre><code>## [1] &quot;sheep&quot; &quot;fox&quot;   &quot;owl&quot;   &quot;ant&quot;   &quot;snake&quot;</code></pre>
+<pre class="r"><code>queue &lt;- queue[2:length(queue)] #the sheep enters the ark
+print(queue)</code></pre>
+<pre><code>## [1] &quot;fox&quot;   &quot;owl&quot;   &quot;ant&quot;   &quot;snake&quot;</code></pre>
+<pre class="r"><code>queue &lt;- c(&quot;donkey&quot;,queue) #the donkey arrives and talks his way to the front of the line
+print(queue)</code></pre>
+<pre><code>## [1] &quot;donkey&quot; &quot;fox&quot;    &quot;owl&quot;    &quot;ant&quot;    &quot;snake&quot;</code></pre>
+<pre class="r"><code>queue &lt;- queue[1:length(queue)-1] #the serpent gets impatient and leaves
+print(queue)</code></pre>
+<pre><code>## [1] &quot;donkey&quot; &quot;fox&quot;    &quot;owl&quot;    &quot;ant&quot;</code></pre>
+<pre class="r"><code>queue &lt;- queue[c(1,2,4)] #the owl gets bored and leaves
+print(queue)</code></pre>
+<pre><code>## [1] &quot;donkey&quot; &quot;fox&quot;    &quot;ant&quot;</code></pre>
+<pre class="r"><code>queue &lt;- c(queue[1:2],&quot;aphid&quot;,queue[3]) #the aphid arrives and the ant invites him to cut in line.
+print(queue)</code></pre>
+<pre><code>## [1] &quot;donkey&quot; &quot;fox&quot;    &quot;aphid&quot;  &quot;ant&quot;</code></pre>
+<pre class="r"><code>which(queue==&quot;aphid&quot;) #Finally, determine the position of the aphid in the line</code></pre>
+<pre><code>## [1] 3</code></pre>
 <ol start="5" style="list-style-type: decimal">
 <li>Use R to create a vector of all of the integers from 1 to 100 that are not divisible by 2, 3, or 7.</li>
 </ol>
