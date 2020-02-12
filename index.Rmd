@@ -22,3 +22,5 @@ knitr::opts_chunk$set(echo = TRUE)
 ### [Homework 3](https://hanusia.github.io/HigginsBio381/Higgins_week3_homework)
 
 ### [Homework 4](https://hanusia.github.io/HigginsBio381/Higgins_week4_homework)
+
+### [Homework 5](https://hanusia.github.io/HigginsBio381/Higgins_week5_homework)
