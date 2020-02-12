@@ -1,0 +1,104 @@
+---
+title: "Week 5 homework solutions"
+author: "Hanusia Higgins"
+date: "2/12/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Working with matrices, lists, and data frames
+
+## 1.
+
+```{r}
+ #Assign to the variable n_dims a single random integer between 3 and 10.
+n_dims <- sample(x=3:10,size=1)
+print(n_dims)
+#Create a vector of consecutive integers from 1 to n_dims^2.
+vec_1 <- 1:(n_dims)^2 
+print(vec_1)
+#Use the sample function to randomly reshuffle these values.
+vec_1 <- sample(vec_1, size=length(vec_1), replace=FALSE) 
+print(vec_1)
+ #create a square matrix with these elements.  
+mat_1 <- matrix(data=vec_1, nrow=n_dims)
+print(mat_1) #print out the matrix. 
+mat_1 <- t(mat_1) #find a function in r to transpose the matrix.  
+print(mat_1) #print it out again and note how it has changed. 
+#the rows and columns have switched places
+
+#calculate the sum and the mean of the elements in the first row and the last row.
+sum(mat_1[1,]) 
+mean(mat_1[1,])
+sum(mat_1[n_dims,])
+mean(mat_1[n_dims,])
+
+# ?eigen #read about the eigen() function
+results_1 <- eigen(mat_1) # and use it on your matrix
+print(results_1)
+typeof(results_1$values) 
+# the elements of $values are complex data types (except when it's a n_dims<6, then it's a double??)
+
+typeof(results_1$vectors) 
+#the elements of $vectors are also complex data types (except when it's n_dims<6, then it's a double??)
+```
+
+
+## 2.
+
+```{r}
+ # a 4 x 4 matrix filled with random uniform values
+my_matrix <- matrix(data=runif(n=16),nrow=4)
+print(my_matrix)
+ #a 100-element vector of 1s and 0s, randomly sampled
+my_logical <- sample(x=0:1,size=100,replace=TRUE)
+head(my_logical)
+#a 100-element vector of TRUE or FALSE values, logically coerced from 1s and 0s
+my_logical <- my_logical>0 
+head(my_logical)
+ #a 26-element vector of all the lower-case letters in random order.
+my_letters <- sample(x=letters,size=length(letters))
+print(my_letters)
+#creating a new list with the desired components
+new_list <- list(my_matrix[2,2],my_logical[2], my_letters[2]) 
+#confirming that the first component of my new list is a double
+typeof(new_list[[1]]) 
+#confirming that the second component of my new list is logical
+typeof(new_list[[2]]) 
+#confirming that the third component of my new list is a character
+typeof(new_list[[3]]) 
+#combine the underlying elements from the new list into a single atomic vector with the c() function
+new_vec <- c(new_list[[1]],new_list[[2]],new_list[[3]]) 
+print(new_vec)
+typeof(new_vec) #this is a character vector because the other data was coerced to the character data type
+```
+
+## 3.
+
+```{r}
+#Create a data frame with two variables (= columns) and 26 cases (= rows).  
+my_df <- data.frame(my_unis=runif(n=26,min=0,max=10), #call the first variable my_unis and fill it with a random uniform value from 0 to 10
+                    my_letters=sample(x=LETTERS,size=26,replace=FALSE)) #call the second variable my_letters and fill it with 26 capital letters in random order.
+print(my_df)
+ #for the first variable, use a single line of code in R to select 4 random rows and replace the numerical values in those rows with NA.
+my_df[sample(x=1:nrow(my_df),size=4),1] <- NA
+ #for the first variable, write a single line of R code to identify which rows have the missing values.
+my_df[is.na(my_df),]
+ #for the second variable, sort it in alphabetical order  
+my_df2 <- my_df[order(my_df[,2]),]
+print(my_df2)
+#calculate the column mean for the first variable. 
+mean(my_df[,1],na.rm=TRUE) 
+```
+
+
+
+
+
+
+
+
+
