@@ -1,0 +1,7 @@
+# metadata
+# lots of it!
+#more lines of metadata
+#next up: the row with all the column/variable names
+sample_id, var_1, second_var, var_3
+1, 10.0, "string1", 10.33
+2, 1.00001, "another", -4.55

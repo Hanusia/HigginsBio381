@@ -1,0 +1,190 @@
+---
+title: "Week 6 homework"
+author: "Hanusia Higgins"
+date: "2/19/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Open libraries
+```{r}
+library(ggplot2) # for graphics
+library(MASS) # for maximum likelihood estimation
+```
+
+### Read in data vector
+```{r}
+# quick and dirty, a truncated normal distribution to work on the solution set
+
+# z <- rnorm(n=3000,mean=0.2)
+# z <- data.frame(1:3000,z)
+# names(z) <- list("ID","myVar")
+# z <- z[z$myVar>0,]
+# str(z)
+# summary(z$myVar)
+
+#adding in real data
+#from EDI data portal, "Future of Oak Forests experiment-
+#DBH of trees in Black Rock Forest, New York, USA, 2007."
+#by Schuster, W.S.
+
+z <- read.table("BRf_NorthSlopeOaks2007.csv",header=TRUE,sep=",", stringsAsFactors=FALSE)
+str(z) #it's counting the DBH values (continuous) as characters
+summary(z) #so I need to get it to read as numeric
+
+head(z)
+#making the column I want a numeric vector
+z$DBH <- as.numeric(z$DBH)  
+#removing NA values
+z <- na.omit(z)
+str(z) #that's better!
+#reducing it to 2 columns for simplicity
+z <- z[,3:4]
+#renaming the columns to fit in w/ the rest of the code
+names(z) <- list("Species","myVar")
+str(z)
+summary(z)
+
+```
+
+### Plot histogram of data
+```{r}
+#visualizing the data before working with it
+p1 <- ggplot(data=z, aes(x=myVar, y=..density..)) +
+  geom_histogram(color="grey60",fill="cornsilk",size=0.2) 
+print(p1)
+```
+
+### Add empirical density curve
+```{r}
+#adding a density curve that follows the actual data
+p1 <-  p1 +  geom_density(linetype="dotted",size=0.75)
+print(p1)
+```
+
+### Get maximum likelihood parameters for `normal`
+```{r}
+#if these data do fit a normal distribution,
+#what are the mean and variance?
+normPars <- fitdistr(z$myVar,"normal")
+print(normPars)
+str(normPars)
+normPars$estimate["mean"] # note structure of getting a named attribute
+normPars$estimate["sd"] #doing the same thing for sd
+```
+
+### Plot `normal` probability density
+```{r}
+#this one doesn't fit very well.
+meanML <- normPars$estimate["mean"]
+sdML <- normPars$estimate["sd"]
+
+xval <- seq(0,max(z$myVar),len=length(z$myVar))
+
+ stat <- stat_function(aes(x = xval, y = ..y..), fun = dnorm, colour="red", n = length(z$myVar), args = list(mean = meanML, sd = sdML))
+ p1 + stat
+```
+
+### Plot `exponential` probability density
+```{r}
+#this also doesn't fit very well.
+#fitting the DBH data to an exponential distribution
+expoPars <- fitdistr(z$myVar,"exponential")
+#storing the exponential growth rate as a variable
+rateML <- expoPars$estimate["rate"]
+
+#graphin' it
+stat2 <- stat_function(aes(x = xval, y = ..y..), fun = dexp, colour="blue", n = length(z$myVar), args = list(rate=rateML))
+ p1 + stat + stat2
+```
+
+### Plot `uniform` probability density
+```{r}
+#this one doesn't fit well, either...the data definitely isn't uniform.
+stat3 <- stat_function(aes(x = xval, y = ..y..), fun = dunif, colour="darkgreen", n = length(z$myVar), args = list(min=min(z$myVar), max=max(z$myVar)))
+ p1 + stat + stat2 + stat3
+```
+
+### Plot `gamma` probability density
+```{r}
+#this distribution still doesn't capture the bimodal distribution.
+#trying to fit to a gamma distribution
+gammaPars <- fitdistr(z$myVar,"gamma")
+#recording the gamma-specific variables of shape and rate
+shapeML <- gammaPars$estimate["shape"]
+rateML <- gammaPars$estimate["rate"]
+
+stat4 <- stat_function(aes(x = xval, y = ..y..), fun = dgamma, colour="brown", n = length(z$myVar), args = list(shape=shapeML, rate=rateML))
+ p1 + stat + stat2 + stat3 + stat4
+```
+
+### Plot `beta` probability density
+```{r}
+#first, transforming the data so it is all in the range of 0:1 (required for the beta distribution.)
+pSpecial <- ggplot(data=z, aes(x=myVar/(max(myVar + 0.1)), y=..density..)) +
+  geom_histogram(color="grey60",fill="cornsilk",size=0.2) + 
+  xlim(c(0,1)) +
+  geom_density(size=0.75,linetype="dotted")
+
+#now, fitting a beta distribution. This one is probably the best fit, even though it's still not capturing the two peaks of the data.
+betaPars <- fitdistr(x=z$myVar/max(z$myVar + 0.1),start=list(shape1=1,shape2=2),"beta")
+#recording the parameters of this distribution of best fit, which are called shape1 and shape2
+shape1ML <- betaPars$estimate["shape1"]
+shape2ML <- betaPars$estimate["shape2"]
+
+#graphing it
+statSpecial <- stat_function(aes(x = xval, y = ..y..), fun = dbeta, colour="orchid", n = length(z$myVar), args = list(shape1=shape1ML,shape2=shape2ML))
+pSpecial + statSpecial
+```
+
+## Step 5.
+
+I am using the beta distribution because it fits the data best (although it still doesn't really fit).It still doesn't capture the bimodal nature of these data.
+```{r}
+#getting the maximum likelihood parameters for the beta distribution: 
+print(shape1ML)
+print(shape2ML)
+
+length(z$myVar) #getting length of the real data
+
+#simulating a new data set using these parameters:
+z2 <- rbeta(n=length(z$myVar), shape1=shape1ML, shape2=shape2ML)
+z2 <- data.frame(1:length(z$myVar),z2)
+names(z2) <- list("ID","myVar")
+str(z2)
+summary(z2$myVar)
+
+#plotting the new simulated dataset in a histogram:
+p1 <- ggplot(data=z2, aes(x=myVar, y=..density..)) +
+  geom_histogram(color="grey60",fill="cornsilk",size=0.2) 
+
+#re-assigning xval to relate to the simulated data
+xval <- seq(0,max(z2$myVar),len=length(z2$myVar))
+
+#adding the probability density curve:
+statSpecial <- stat_function(aes(x = xval, y = ..y..), fun = dbeta, colour="orchid", n = length(z2$myVar), args = list(shape1=shape1ML,shape2=shape2ML))
+
+p1 + statSpecial #graphing simulated data w/ the curve
+
+#now, plotting the original (real) data again (modified to fit into the beta distribution)
+pSpecial <- ggplot(data=z, aes(x=myVar/(max(myVar + 0.1)), y=..density..)) +
+  geom_histogram(color="grey60",fill="cornsilk",size=0.2) +
+  xlim(c(0,1))
+
+#re-assigning xval to relate to the real data
+xval <- seq(0,max(z$myVar),len=length(z$myVar))
+
+#adding the probability density curve:
+statSpecial <- stat_function(aes(x = xval, y = ..y..), fun = dbeta, colour="orchid", n = length(z$myVar), args = list(shape1=shape1ML,shape2=shape2ML))
+
+pSpecial + statSpecial #graphing real data w/ the curve
+
+```
+
+
+The simulated data fits the beta distribution curve much better than the real data.  
+The beta distribution still doesn't capture the bimodality of the real data, so by nature it is not doing a good job of simulating realistic data that match the original measurements.
+
