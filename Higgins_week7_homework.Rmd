@@ -1,0 +1,158 @@
+---
+title: "Homework 7 solutions"
+author: "Hanusia Higgins"
+date: "2/26/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+### Generating the false data set
+
+This is a simplified version of how I imagine some of my data will look.  
+(I haven't actually collected the data yet)  
+
+The y-variable is the number of ash tree (Fraxinus sp.) seedlings are collected in a sample plot.  
+
+The x-variable I will look at today is:   
+
+Harvest status (harvested for emerald ash borer management/not harvested)     
+Which will be represented as the following four groups:  
+
+1. no harvest: "control"   
+2. has been harvested: "harvest"  
+
+```{r}
+#following the same format we learned in class...
+n_group <- 2 #number of treatment groups
+n_name <- c("control","harvest") #naming the treatment groups
+n_size <- c(25,25) #sample size = 25 of each treatment type
+
+#I predict a higher # of seedlings in control plots than harvested ones
+n_mean <- c(45,30)
+n_sd <- c(10,10) #same SD/variance between groups
+t_group <- rep(n_name,n_size)
+
+id <- 1:(sum(n_size))
+
+#simulating data as the response variable:
+seedlings <- c(rnorm(n=n_size[1],mean=n_mean[1],sd=n_sd[1]),
+             rnorm(n=n_size[2],mean=n_mean[2],sd=n_sd[2])) 
+
+#creating the data frame
+sim_data <- data.frame(id,t_group,seedlings)
+str(sim_data)
+
+```
+
+### Analyzing the data
+
+I will use an ANOVA to analyze the data.  
+(I could also use a t-test since there are only 2 groups, but I may want to adjust this to include more treatment groups in the future.) 
+
+```{r}
+ano_model <- aov(seedlings~t_group,data=sim_data)
+print(summary(ano_model)) #found a significant result
+```
+
+### Visualizing the data
+
+I will use the ggplot2 package to visualize the data.
+
+```{r}
+library(ggplot2)
+
+ano_plot <- ggplot(data=sim_data, #plotting the anova results
+                   aes(x=t_group, #by treatment group
+                       y=seedlings,
+                   fill=t_group)) +
+                   geom_boxplot() #specifies the type of graph we want
+print(ano_plot)
+```
+
+### Varying the mean
+
+In this section, I will vary the means of both groups to find out how close they can be while still showing a statistically significant difference. 
+```{r}
+#Keeping all else the same, besides the mean......
+
+for (i in 0:7){
+
+n_mean2 <- c(45,30)
+
+  n_mean2[1] = n_mean2[1]-i #bringing the means closer together
+  n_mean2[2] = n_mean2[2]+i #with each iteration of the for loop
+  
+  #the new means are reflected in the response variable distributions
+  seedlings <- c(rnorm(n=n_size[1],mean=n_mean2[1],sd=n_sd[1]),
+             rnorm(n=n_size[2],mean=n_mean2[2],sd=n_sd[2])) 
+
+#creating the data frame
+sim_data <- data.frame(id,t_group,seedlings)
+
+#analyzing the data
+ano_model <- aov(seedlings~t_group,data=sim_data)
+
+#using code from last week as a model:
+z <- summary(ano_model)
+
+#for each iteration of effect size, this prints out the difference between the means, the associated p-value, and whether it's significant
+print(paste("Effect size: ",
+            n_mean[1]-n_mean[2],
+            ", p-value: ",
+            unlist(z)[9],
+            ", significant? ",
+            unlist(z)[9]<0.05))
+}
+```
+
+##### After running this code several times, I found that the significance was variable at all but the highest and lowest effect sizes I chose.  
+##### When the difference between the means was 15, the difference in the distributions was always significant. 
+##### When the difference between the means was 1, the difference in the distributions was never significant.
+##### For all the effect sizes in between, it varied...
+I could also add an outer for loop to run this code a bunch of times and find out how likely each effect size is to be significant.
+
+### Varying the sample size
+
+In this section, I will vary the sample size to find out how small it can be while still showing a statistically significant difference between the treatment groups (using my original effect size).
+
+```{r}
+#Keeping all else the same, besides the sample size...
+
+for (i in seq(from=25,to=5,by=-5)){
+  
+n_size <- c(i,i)
+
+t_group <- rep(n_name,n_size)
+id <- 1:(sum(n_size))
+
+#simulating data as the response variable:
+seedlings <- c(rnorm(n=n_size[1],mean=n_mean[1],sd=n_sd[1]),
+             rnorm(n=n_size[2],mean=n_mean[2],sd=n_sd[2])) 
+
+#creating the data frame
+sim_data <- data.frame(id,t_group,seedlings)
+
+#analyzing the data
+ano_model <- aov(seedlings~t_group,data=sim_data)
+
+#using code from last week as a model:
+z <- summary(ano_model)
+
+#for each iteration of effect size, this prints out the difference between the means, the associated p-value, and whether it's significant
+print(paste("Sample size per group: ",
+            i,
+            ", p-value: ",
+            unlist(z)[9],
+            ", significant? ",
+            unlist(z)[9]<0.05))
+}
+```
+
+##### When the sample size per group was 10 or greater, the difference in the distributions was always significant. 
+##### However, at a sample size per group of 5, the difference in the distributions was sometimes significant, other times not.
+##### Therefore, the minimum sample size I would need to detect a statistically significant effect is 10 samples per treatment group.
+
+
