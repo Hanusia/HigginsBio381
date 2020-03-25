@@ -1,0 +1,187 @@
+---
+title: "Week 9 homework"
+author: "Hanusia Higgins"
+date: "3/25/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+```{r}
+# load library-------------------------------
+library(ggplot2) 
+
+# compile functions -------------------------------
+
+# --------------------------------------------------
+# FUNCTION generate_data
+# description: simulates a data set that will resemble mine
+# inputs: dataframe of parameters for the dataset
+# outputs: dataframe sim_data w/ the simulated data
+####################################################
+generate_data <- function(pars) { #same SD between groups
+ 
+  #creating variables for eventual dataframe
+  t_group <- rep(pars$n_name,pars$n_size) 
+  id <- 1:(sum(pars$n_size))
+  
+  #simulating data as the response variable:
+  seedlings <- c(rnorm(n=pars$n_size[1],mean=pars$n_mean[1],sd=pars$n_sd[1]),
+                 rnorm(n=pars$n_size[2],mean=pars$n_mean[2],sd=pars$n_sd[2])) 
+  
+  #creating the data frame
+  sim_data <- data.frame(id,t_group,seedlings)
+  return(sim_data)
+
+} # end of generate_data
+#---------------------------------------------------
+
+# --------------------------------------------------
+# FUNCTION analyze_data
+# description: use an ANOVA to test difs between treatment groups
+# inputs: a dataframe containing my simulation data
+# outputs: summary of ANOVA
+####################################################
+analyze_data <- function(simul_data=NA) {
+
+  if(is.data.frame(simul_data)) {
+    ano_model <- aov(seedlings~t_group,data=simul_data)
+    return(summary(ano_model))
+  } else {
+    return(print("requires dataframe input"))
+  }
+
+} # end of analyze_data
+#---------------------------------------------------
+
+# --------------------------------------------------
+# FUNCTION plot_data
+# description: creates a boxplot of the data
+# inputs: data frame of dummy data set
+# outputs: boxplot comparing treatment groups
+####################################################
+plot_data <- function(simul_data=NA) {
+  
+  if(is.data.frame(simul_data)) {
+    ano_plot <- ggplot(data=simul_data, #plotting the anova results
+                       aes(x=t_group, #by treatment group
+                           y=seedlings,
+                           fill=t_group)) +
+      geom_boxplot() #specifies the type of graph we want
+    print(ano_plot)
+  } else {
+    return(print("requires dataframe input"))
+  }
+
+} # end of plot_data
+#---------------------------------------------------
+
+# --------------------------------------------------
+# FUNCTION vary_means
+# description: for loop varying the means of each group
+# inputs: dataframe of parameters for the dataset
+# outputs: prints effect sizes w/ corresponding p-vals
+####################################################
+vary_means <- function(pars) {
+
+  #Keeping all else the same, besides the mean......
+
+for (i in 0:7){
+
+#using code from class as a model to extract different things from the summary, and using other functions within this function:
+z <- analyze_data(generate_data(pars))
+
+#for each iteration of effect size, this prints out the difference between the means, the associated p-value, and whether it's significant
+print(paste("Effect size: ",
+            pars$n_mean[1]-pars$n_mean[2],
+            ", p-value: ",
+            unlist(z)[9],
+            ", significant? ",
+            unlist(z)[9]<0.05))
+
+  pars$n_mean[1] = pars$n_mean[1]-1 #bringing the means closer together
+  pars$n_mean[2] = pars$n_mean[2]+1 #for the next iteration of the for loop
+}
+
+} # end of vary_means
+#---------------------------------------------------
+
+# --------------------------------------------------
+# FUNCTION vary_size
+# description: for loop varying sample size
+# inputs: dataframe of parameters for the dataset
+# outputs: prints sample sizes w/ corresponding p-vals
+####################################################
+vary_size <- function(pars) {
+
+for (i in seq(from=25,to=5,by=-5)){ #using a for loop like in previous function
+  
+  pars$n_size <- c(i,i)  #varying sample size of the treatment groups
+  
+  #using code from class as a model to extract different things from the summary, and using   other functions within this function:
+  z <- analyze_data(generate_data(pars))
+  
+  #for each iteration of effect size, this prints out the difference between the means, the associated p-value, and whether it's significant
+  print(paste("Sample size per group: ",
+              i,
+              ", p-value: ",
+              unlist(z)[9],
+              ", significant? ",
+             unlist(z)[9]<0.05))
+  }
+} # end of vary_size
+#---------------------------------------------------
+
+# --------------------------------------------------
+# FUNCTION plot_data2
+# description: creates a density plot of the data
+# inputs: data frame of dummy data set
+# outputs: density plot comparing treatment groups
+####################################################
+plot_data2 <- function(simul_data=NA) {
+
+  if(is.data.frame(simul_data)) {
+    ano_plot <- ggplot(data=simul_data, #plotting the anova results
+                       aes(x=seedlings)) + # number of seedlings on x-axis
+      #specifies the type of graph we want, separating by treatment       
+      geom_density(aes(fill=factor(t_group)),
+                   alpha=0.7) #making groups more transparent
+    print(ano_plot)
+  } else {
+    return(print("requires dataframe input"))
+  }
+
+} # end of plot_data2
+#---------------------------------------------------
+
+
+# end of functions -------------------------------
+##############################################
+
+
+# global variables -------------------------------
+#the global variables are what I am changing
+
+# "pars" is the parameters for generating the dataset
+pars=data.frame(n_name=c("control","harvest"),#2 treatment groups
+                n_size=c(25,25), #25 in each group
+                n_mean=c(45,30), #dif means between groups
+                n_sd=c(10,10))
+
+##############################################  
+
+sim_data <- generate_data(pars) #temp variable to store this iteration of the data set
+
+analyze_data(sim_data) #running ANOVA analysis
+
+plot_data(sim_data) #visualizing the data
+
+plot_data2(sim_data) #this is the function I added this week! Visualizing the data in a different way
+
+vary_means(pars) #varying the means to alter effect size
+
+vary_size(pars) #varying sample sizes of each group
+
+```
