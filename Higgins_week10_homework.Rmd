@@ -1,0 +1,272 @@
+---
+title: 'Homework #10'
+author: "Hanusia Higgins"
+date: "3/30/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+1. Using a for loop, write a function to calculate the number of zeroes in a numeric vector. Before entering the loop, set up a counter variable counter <- 0. Inside the loop, add 1 to counter each time you have a zero in the matrix. Finally, use return(counter) for the output.
+
+```{r}
+
+#creating a numeric vector
+vec1 <- rnorm(n=1000, mean=0, sd=1)
+vec2 <- c(0,0,1,2,3,4,0,5)
+
+# --------------------------------------------------
+# FUNCTION count_zeros
+# description: calculates number of 0s in a numeric vector
+# inputs: numeric vector 
+# outputs: variable "counter" which returns # of 0s in the vector
+####################################################
+count_zeros <- function(numvec) {
+
+#setting up the counter variable
+counter <- 0 
+
+for(i in seq_along(numvec)){ #start of loop
+  #adding 1 to counter for each element in the vector that = 0
+  if(numvec[i]==0) { #beginning of if statement
+    counter <- counter + 1 
+  } #end of if statement
+} #end of loop
+  return(counter)
+} # end of count_zeros
+#---------------------------------------------------
+
+#testing the function
+count_zeros(vec1)
+count_zeros(vec2)
+
+```
+
+2. Use subsetting instead of a loop to rewrite the function as a single line of code.
+
+```{r}
+# --------------------------------------------------
+# FUNCTION count_zeros_quicker
+# description: calculates # of zeros in a numeric vector
+# inputs: numeric vector
+# outputs: variable "counter" which returns # of 0s in the vector
+####################################################
+count_zeros_quicker <- function(numvec) {
+
+  #executing the function via subsetting
+  counter <- length(numvec[numvec==0])
+
+return(counter)
+
+} # end of count_zeros_quicker
+#---------------------------------------------------
+
+#testing the function
+count_zeros_quicker(vec1)
+count_zeros_quicker(vec2)
+```
+
+3. Write a function that takes as input two integers representing the number of rows and columns in a matrix. The output is a matrix of these dimensions in which each element is the product of the row number x the column number.
+```{r}
+# --------------------------------------------------
+# FUNCTION mat_fun
+# description: multiplies row by column # & stores each product in the corresponding element in a matrix
+# inputs: 2 integers r and c representing dimensions of the matrix
+# outputs: a matrix with the given dimensions & contents
+####################################################
+mat_fun <- function(r=5, c=3) {
+
+  #initializing the matrix w/ the given dimensions
+mat1 <- matrix(nrow=r,ncol=c)
+
+for(i in 1:c){ #start of outer (column) loop
+  for(j in 1:r){ #start of inner (row) loop
+    mat1[j,i] <- i*j #stores product of row x column in that element of the matrix
+  } #end of inner loop
+} #end of outer loop
+
+#returning the filled-in matrix
+return(mat1)
+
+} # end of mat_fun
+#---------------------------------------------------
+
+#testing the function
+mat_fun()
+mat_fun(4,6)
+```
+
+4. Use the code from the upcoming April 2nd lecture (Randomization Tests) to design and conduct a randomization test for some of your own data. You will need to modify the functions that read in the data, calculate the metric, and randomize the data. Once those are set up, the program should run correctly calling your new functions. Also, to make your analysis fully repeatable, make sure you set the random number seed at the beginning (use either set.seed() in base R, or char2seed in the TeachingDemos package
+
+```{r}
+# Preliminaries -------------------------------
+
+library(ggplot2)
+library(TeachingDemos)
+
+set.seed(100)
+
+#disclaimer: I don't have my own data, so I am using some 
+#from EDI data portal, "Future of Oak Forests experiment-
+#DBH of trees in Black Rock Forest, New York, USA, 2007."
+#by Schuster, W.S.
+
+# build functions -------------------------------
+
+# --------------------------------------------------
+# FUNCTION read_data
+# description: read in data set for analysis  
+# inputs: file name
+# outputs: 3-column dataframe of observed data (ID, x, y)
+####################################################
+read_data <- function(z=NULL) {
+
+
+      df <- read.table(file=z,
+                      header=TRUE,
+                      sep=",",
+                      stringsAsFactors=FALSE)
+      
+return(df)
+
+} # end of read_data
+#---------------------------------------------------
+
+# --------------------------------------------------
+# FUNCTION clean_oak_data
+# description: simplifying this specific dataset
+# inputs: dataframe created from csv file in read_data
+# outputs: dataframe w/ only 2 columns & 2 groups in x-var
+####################################################
+clean_oak_data <- function(df=NULL) {
+
+    df <- df[,3:4] #removing extraneous columns from the dataset
+    df <- df[df[,1]=="RO"|df[,1]=="WO",] #removing all but 2 groups
+    #remaining groups are RO (red oak) and WO (white oak)
+    df[,1] <- as.factor(df[,1]) #re-coding x-var (Species) as factor
+    df[,2] <- as.numeric(df[,2]) #re-coding y-var (DBH) as numeric
+    df <- df[!is.na(df[,2]),] #removing rows w/ NAs
+    
+    return(df)
+
+} # end of clean_oak_data
+#---------------------------------------------------
+
+# --------------------------------------------------
+# FUNCTION get_metric
+# description: calculate metric for randomization test
+# inputs: 2-column data frame
+# outputs: difference in means of the 2 treatment groups
+####################################################
+get_metric <- function(df=NULL) {
+
+  #calculates difference between the mean value of each group/Species
+ mean_dif <- abs(mean(df[df$Species == "RO",2]) - 
+                 mean(df[df$Species == "WO",2]))
+   
+  return(mean_dif)
+
+} # end of get_metric
+#---------------------------------------------------
+
+# --------------------------------------------------
+# FUNCTION shuffle_data
+# description: randomize data for species group comparison
+# inputs: 2 column data frame (xvar, yvar)
+# outputs: 2 column data frame (xvar, yvar)
+####################################################
+shuffle_data <- function(z=NULL) {
+  
+  z[,2] <- sample(z[,2]) #this will reshuffle y-vals
+  
+return(z)
+
+} # end of shuffle_data
+#---------------------------------------------------
+
+# --------------------------------------------------
+# FUNCTION get_pval
+# description: calculate p value from simulation
+# inputs: list of observed metric and vector of 
+#         simulated metrics 
+# outputs: lower and upper tail probability value
+####################################################
+get_pval <- function(z=NULL) {
+
+    #  if(is.null(z)){
+    #    z <- list(rnorm(1), rnorm(1000)) 
+    #  }
+        p_lower <- mean(z[[2]]<=z[[1]]) #calculate lower limit
+        p_upper <- mean(z[[2]]>=z[[1]]) #calculate upper limit
+
+return(c(pL=p_lower,pU=p_upper))
+
+} # end of get_pval
+#---------------------------------------------------
+
+# --------------------------------------------------
+# FUNCTION plot_ran_test
+# description: create a ggplot of histogram of 
+#              simulated values
+# inputs: list of observed metric and vector of
+#         simulated metrics
+# outputs: saved ggplot graph
+####################################################
+plot_ran_test <- function(z=NULL) {
+
+      #      if(is.null(z)){
+      #       z <- list(rnorm(1),rnorm(1000))
+      #      }
+        df <- data.frame(ID=seq_along(z[[2]]),
+                         sim_x=z[[2]])
+        p1 <- ggplot(data=df, mapping=aes(x=sim_x))
+        p1 + geom_histogram(mapping=aes(fill=I("goldenrod"),
+                                        color=I("black"))) +
+          geom_vline(aes(xintercept=z[[1]],col="blue"))
+
+
+} # end of plot_ran_test
+#---------------------------------------------------
+
+# END OF FUNCTIONS -------------------------------
+##############################################
+
+# runnning the program -------------------------------
+
+n_sim <- 1000 # number of simulated data sets
+x_sim <- rep(NA,n_sim) #set up empty vector for 
+# simulated differences in means
+
+df <- read_data("BRf_NorthSlopeOaks2007.csv") #getting data
+df <- clean_oak_data(df) #simplifying this specific data set
+x_obs <- get_metric(df) # get difference in means of obs data
+
+for (i in seq_len(n_sim)){ #could also do i in 1:n_sim 
+  x_sim[i] <- get_metric(shuffle_data(df)) #run simulation
+}
+
+difs <- list(x_obs,x_sim)
+get_pval(difs)
+plot_ran_test(difs)
+
+```
+
+
+5. For comparison, calculate in R the standard statistical analysis you would use with these data. How does the p-value compare for the standard test versus the p value you estimated from your randomization test? If the p values seem very different, run the program again with a different starting seed (and/or increase the number of replications in your randomization test). If there are persistent differences in the p value of the standard test versus your randomization, what do you think is responsible for this difference?
+
+```{r}
+
+# normally, I would use an ANOVA or t-test to compare the means of two groups (species) lik I am with this randomization test.
+
+testing_t <- t.test(x=df[df$Species == "RO",2], y=df[df$Species == "WO",2]) #using a simple t-test to compare groups
+print(testing_t) #printing the result
+
+#comparing to the p-val in my randomization test:
+print(get_pval(difs))
+
+#conclusion: The p-vals in my randomization test and the standard test are roughly the same.
+
+```
+
