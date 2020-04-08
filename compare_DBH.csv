@@ -1,5 +1,5 @@
 # Summary stats forbatch processing of ANOVA models
-# timestamp: 2020-04-08 12:36:17
+# timestamp: 2020-04-08 12:42:12
 "ID","file_name","p_val"
 1,"HRPLOT1_02_2020_GAP.csv",0.00508961430243058
 2,"HRPLOT2_02_2020_GAP.csv",0.166932743024283

@@ -126,8 +126,12 @@ write.table(x=stats_out,
 
 
 # now outputting the plots in a separate document
-# for some reason, the first page of this output is blank...but the plots are all there after the blank first page!
+
 ggsave(file_out_2, marrangeGrob(grobs = plots, nrow=2, ncol=2))
 
 ```
 
+#### [Here's the link to my summary stats output file](https://hanusia.github.io/HigginsBio381/compare_DBH.csv)
+
+#### [And here's the link to my plots output file](https://hanusia.github.io/HigginsBio381/compare_DBH_boxplots.pdf)
+For some reason, the first page of this output is blank...but the plots are all there after the blank first page!
