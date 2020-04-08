@@ -1,0 +1,133 @@
+---
+title: "Week 11 homework"
+author: "Hanusia Higgins"
+date: "4/7/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Repeat the exercise from the Batch Processing Lecture (7th April), but do it using real data sets rather than purely simulated. Check with folks in your lab to see if there are multiple data sets available for analysis. Stick to simple data analyses and graphics, but try to set it up as a batch process that will work on multiple files and save summary results to a common file.
+
+```{r}
+# set up functions -------------------------------
+
+# --------------------------------------------------
+# FUNCTION aov_stats
+# description: conducts ANOVA of DBH ~ tree species
+# inputs: dataframe that includes DBH and species
+# outputs: p-value of ANOVA test
+####################################################
+aov_stats <- function(df=NULL) {
+
+  # create an ANOVA
+  ano_model <- aov(DBH_cm ~ species, data=df)
+  
+  #extract the p-value
+  . <- summary(ano_model)
+  . <- unlist(.)[9]
+  
+return(.) #return p-value
+
+} # end of aov_stats
+#---------------------------------------------------
+
+# --------------------------------------------------
+# FUNCTION plot_data
+# description: creates a boxplot of the data
+# inputs: data frame including species & DBH
+# outputs: boxplot comparing DBH among species
+####################################################
+plot_data <- function(df=NA) {
+  
+    ano_plot <- ggplot(data=df, #plotting the anova results
+                       aes(x=species, #by treatment group
+                           y=DBH_cm,
+                           fill=species)) +
+      geom_boxplot() #specifies the type of graph we want
+    return(ano_plot)
+
+} # end of plot_data
+#---------------------------------------------------
+
+# end of functions -------------------------------
+##############################################
+
+# the data set I'm using includes species codes and diamater at breast height (DBH) for overstory trees in plots on a private property I sampled.
+# each file contains the data from one sampling location.
+# note: this analysis isn't what I am actually studying, but since I don't have those data yet to analyze, I'm working with what I have for practice!
+
+# load packages -------------------------------
+library(ggplot2)
+library(grid)
+library(gridExtra)
+
+# Global variables -------------------------------
+file_folder <- "hill_roberts_data/"
+file_out <- "compare_DBH.csv"
+file_out_2 <- "compare_DBH_boxplots.pdf"
+##############################################
+
+# Create a data frame to hold summary file statistics
+file_names <- list.files(path=file_folder)
+ID <- seq_along(file_names)
+file_name <- file_names
+p_val <- rep(NA,length(file_names))
+
+stats_out <- data.frame(ID,file_name,p_val)
+
+# set up an (empty) list to contain all the plots generated
+# (I googled this technique on outputting multiple plots to a single file- hopefully it works!)
+plots <- list()
+
+# batch process by looping through individuals
+
+for (i in seq_along(file_names)) {
+  data <- read.table(file=paste(file_folder,file_names[i], sep=""),
+                     sep=",",
+                     header=TRUE) # read in next data file
+  
+  #this removes the NAs by subsetting  ("cleans" data)
+  d_clean <- data[complete.cases(data),]
+  
+  # pull out regression stats from clean file
+  . <- aov_stats(d_clean) 
+  
+  # copy into last column of results dataframe
+  stats_out[i,3] <- . 
+  
+  # add this graph to the list of plots
+  plots[[i]] <- plot_data(d_clean)
+}
+
+# set up output file and incorporate timestamp and minimal metadata
+
+write.table(cat("# Summary stats for",
+            "batch processing of ANOVA models",
+            "\n",
+            "# timestamp: ",
+            as.character(Sys.time()),
+            "\n",
+            file=file_out,
+            row.names="",
+            col.names="",
+            sep=""
+            ))
+
+# now add the data frame
+write.table(x=stats_out,
+            file=file_out,
+            row.names=FALSE,
+            col.names=TRUE,
+            sep=",",
+            append=TRUE)
+
+
+# now outputting the plots in a separate document
+# for some reason, the first page of this output is blank...but the plots are all there after the blank first page!
+ggsave(file_out_2, marrangeGrob(grobs = plots, nrow=2, ncol=2))
+
+```
+
