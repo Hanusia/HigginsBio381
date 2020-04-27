@@ -1,0 +1,145 @@
+---
+title: "Homework 12"
+author: "Hanusia Higgins"
+date: "4/26/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+For this exerise, use your newly-developed ggplot chops to create some nice graphs from your own data (If you do not have a good data frame to use for graphics, use one of the many built-in data frames from R (other than mpg, which we are using in class)). Experiment with different themes, theme base sizes, aesthetics, mappings, and faceting. When you are finished, try exporting them to high quality pdfs, jpgs, eps files, or other formats that you would use for submission to a journal.
+
+In this exercise, I encourage you to improve your graphics with elements that we have not (yet) covered in ggplot. For example, can you change the labels on a facet plot so that they are more informative than the variable names that are supplied from your data frame? Can you figure out how to add text annotations, lines and arrows to your graph? Can you figure out how to use custom colors that you have chosen for your fills and lines? Your resources for these explorations are google, Stack Overflow – and Lauren!
+
+```{r}
+
+# preliminaries -------------------------------
+library(ggplot2)
+library(ggthemes)
+library(datasets)
+library(colorspace)
+data("CO2") #using a built-in R dataset
+d <- CO2
+head(d)
+##############################################
+
+# Figure 1: Plotting CO2 uptake vs. concentration 
+
+# First modification: Custom colors for axis & plot titles
+p1 <- ggplot(data=d,
+             mapping=aes(x=conc,y=uptake, group=conc)) +
+      geom_boxplot(
+                 color="navy",fill="yellow") +
+  labs(title="Carbon dioxide uptake in E. crusgalli",
+           subtitle="at varying levels of CO2 concentration",
+           x='ambient CO2 concentration (mL/L)',
+           y='CO2 uptake rate (umol/(m^2*sec)',
+       tag='Fig. 1') + #adding a corner "tag" such as numbering the figure
+  # now, changing the colors of axis labels & plot titles
+  theme(axis.title = element_text(colour="#88b04b"), 
+        plot.title = element_text(colour="#88b04b"),
+        plot.subtitle=element_text(colour="#88b04b",))
+print(p1)
+
+# Trying on a few different themes:
+p1 + theme_map()
+p1 + theme_solarized()
+p1 + theme_stata() # I like this one!
+
+#Now, coloring the different boxes with the Pantone color of the year
+# of the past 10 years:
+
+pantone_cols <- c('#45b5aa', #Turquoise- 2010
+                  '#D65076', #Honeysuckle- 2011
+                  '#dd4124', #Tangerine Tango- 2012
+                  '#00997b', #Emerald- 2013
+                  '#b067a1', #Radiant Orchid- 2014
+                  '#B57170', #Marsala- 2015
+                  '#f7cac9', #Rose Quartz- 2016-a
+                  '#91A8d0', #Serenity- 2016-b
+                  '#88b04b', #Greenery- 2017
+                  '#5f4b8b', #Ultra Violet- 2018
+                  '#ff6f61', #Living Coral- 2019
+                  '#0f4c81' #Classic Blue- 2020
+)
+
+demoplot(pantone_cols, "bar")
+
+p1 <- ggplot(data=d,
+             mapping=aes(x=conc,y=uptake, group=conc)) +
+      geom_boxplot(
+                 color="black",fill=pantone_cols[1:7]) + #using a dif color for each box
+  labs(title="Carbon dioxide uptake in E. crusgalli",
+           subtitle="at varying levels of CO2 concentration",
+           x='ambient CO2 concentration (mL/L)',
+           y='CO2 uptake rate (umol/(m^2*sec)',
+       tag='Fig. 1') + #adding a corner "tag" such as numbering the figure
+  # now, changing the colors of axis labels & plot titles
+  theme(axis.title = element_text(colour="#88b04b"), 
+        plot.title = element_text(colour="#88b04b"),
+        plot.subtitle=element_text(colour="#88b04b",))
+print(p1)
+
+##############################################
+
+# Figure 2: Creating a facet grid with customized labels
+
+p2 <- ggplot(data=d,
+             mapping=aes(x=conc, y=uptake, color=Plant)) +
+      geom_point(position=position_jitter(width=0.1,
+                                      height=0.7)) +
+  labs(title="Carbon dioxide uptake in E. crusgalli",
+           subtitle="at varying levels of CO2 concentration",
+           x='ambient CO2 concentration (mL/L)',
+           y='CO2 uptake rate (umol/(m^2*sec)',
+       tag='Fig. 2')+
+  theme(legend.position="none",
+        plot.title = element_text(hjust = 0.5), #centering the plot title & subtitle
+        plot.subtitle = element_text(hjust = 0.5))
+p2 <- p2 + facet_grid(Type~Treatment, 
+                labeller=label_both) +
+  theme(strip.text = element_text(size=9,
+                                  color="darkgreen", 
+                                  face="italic"),
+        strip.background = element_rect(color = "darkgreen",
+                                        fill="skyblue"))
+print(p2)
+# This faceted graph reveals more patterns in the data than when all treatment groups are lumped togehter. For example, the difference in maximum CO2 uptake between chilled vs. non-chilled plants is larger in plants from Missouri than in plants from Quebec.
+
+##############################################
+
+# Figure 3: Annotating the plot; removing gridlines
+
+p3 <- ggplot(data=d, mapping=aes(x=Type, y=uptake, fill=Treatment)) +       
+      geom_boxplot() +
+      scale_fill_manual(values=pantone_cols[7:8]) +
+      labs(title="CO2 uptake rate between treatment groups",
+           subtitle="Including plants from two sources",
+           x='Plant source',
+           y='CO2 uptake rate (umol/(m^2*sec)',
+           tag='Fig. 3') +
+      theme(legend.position = "bottom",
+            plot.title = element_text(hjust = 0.5),
+        plot.subtitle = element_text(hjust = 0.5),
+        panel.grid.major = element_blank(), 
+          panel.grid.minor = element_blank()) +
+      annotate(geom="text", x=2, y=45, size=4, 
+                label= "n=3 for each Treatment x Type group",
+                color = "purple")
+print(p3)
+
+##############################################
+
+# Outputting and saving final graphs
+
+ggsave(filename="hw_12_plot1.pdf", plot=p1, device="pdf")
+ggsave(filename="hw_12_plot2.pdf", plot=p2, device="pdf")
+ggsave(filename="hw_12_plot3.pdf", plot=p3, device="pdf")
+
+```
+#### [Fig. 1](https://hanusia.github.io/HigginsBio381/hw_12_plot1.pdf)
+#### [Fig. 2](https://hanusia.github.io/HigginsBio381/hw_12_plot2.pdf)
+#### [Fig. 3](https://hanusia.github.io/HigginsBio381/hw_12_plot3.pdf)
+
